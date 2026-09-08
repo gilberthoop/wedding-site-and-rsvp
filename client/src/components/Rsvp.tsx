@@ -7,25 +7,13 @@ import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import Link from "@mui/material/Link";
 import Divider from "@mui/material/Divider";
 import { alpha } from "@mui/material/styles";
 import { palette } from "../theme/weddingTheme";
 import { useScrollReveal } from "../hooks/useScrollReveal";
-
-type FormStatus = "idle" | "loading" | "success" | "error";
-
-const submitNotification = async (email: string): Promise<string> => {
-  const res = await fetch("/api/notifications", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ email }),
-  });
-  const data = await res.json();
-  if (!res.ok && res.status !== 200)
-    throw new Error(data.message || "Something went wrong.");
-  return data.message as string;
-};
+import { IS_NOTIFICATIONS_ENABLED } from "../utils/constants";
+import { submitNotification } from "../utils/helpers/notifications";
+import { FormStatus } from "../utils/types/rsvpAndNotifications";
 
 const Rsvp = () => {
   const sectionRef = useScrollReveal("[data-reveal]");
@@ -82,25 +70,6 @@ const Rsvp = () => {
           zIndex: 0,
         }}
       />
-
-      {/* Botanical divider */}
-      {/* <Box
-        sx={{
-          textAlign: "center",
-          mb: 4,
-          opacity: 0.65,
-          position: "relative",
-          zIndex: 1,
-        }}
-      >
-        <Box
-          component="img"
-          src="/images/divider-botanical.png"
-          alt=""
-          aria-hidden
-          sx={{ maxWidth: 500, width: "100%", mx: "auto" }}
-        />
-      </Box> */}
 
       <Box sx={{ position: "relative", zIndex: 1 }}>
         {/* Section header */}
@@ -197,97 +166,108 @@ const Rsvp = () => {
               directly in the meantime.
             </Typography>
 
-            <Divider sx={{ borderColor: alpha(palette.beige, 0.4), mb: 3 }} />
-
-            {/* Email notification form */}
-            <Typography variant="subtitle2" sx={{ mb: 2 }}>
-              Get Notified When RSVP Opens
-            </Typography>
-
-            {status === "success" ? (
-              <Alert
-                severity="success"
-                sx={{
-                  bgcolor: alpha(palette.pistachio, 0.15),
-                  color: palette.mocha,
-                  border: `1px solid ${alpha(palette.pistachio, 0.4)}`,
-                  borderRadius: 3,
-                  "& .MuiAlert-icon": { color: palette.pistachio },
-                }}
-              >
-                {message ||
-                  "You're on the list! We'll notify you when RSVP opens. 💌"}
-              </Alert>
-            ) : (
-              <Box
-                component="form"
-                onSubmit={handleSubmit}
-                aria-label="Email notification signup"
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  flexDirection: { xs: "column", sm: "row" },
-                  maxWidth: 420,
-                  mx: "auto",
-                }}
-              >
-                <TextField
-                  id="notify-email"
-                  type="email"
-                  placeholder="your@email.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  fullWidth
-                  size="small"
-                  autoComplete="email"
-                  disabled={status === "loading"}
-                  inputProps={{ "aria-label": "Your email address" }}
-                  sx={{
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: { xs: 3, sm: "50px 0 0 50px" },
-                    },
-                  }}
+            {IS_NOTIFICATIONS_ENABLED && (
+              <>
+                <Divider
+                  sx={{ borderColor: alpha(palette.beige, 0.4), mb: 3 }}
                 />
-                <Button
-                  type="submit"
-                  variant="contained"
-                  color="primary"
-                  disabled={status === "loading"}
-                  id="notify-submit"
-                  sx={{
-                    borderRadius: { xs: 3, sm: "0 50px 50px 0" },
-                    px: 2.5,
-                    whiteSpace: "nowrap",
-                    minWidth: 120,
-                  }}
-                >
-                  {status === "loading" ? (
-                    <CircularProgress size={18} sx={{ color: palette.ivory }} />
-                  ) : (
-                    "Notify Me"
-                  )}
-                </Button>
-              </Box>
-            )}
 
-            {status === "error" && (
-              <Alert
-                severity="error"
-                sx={{ mt: 1.5, borderRadius: 3, maxWidth: 420, mx: "auto" }}
-              >
-                {message}
-              </Alert>
-            )}
+                {/* Email notification form */}
+                <Typography variant="subtitle2" sx={{ mb: 2 }}>
+                  Get Notified When RSVP Opens
+                </Typography>
 
-            <Divider sx={{ borderColor: alpha(palette.beige, 0.4), my: 3 }} />
+                {status === "success" ? (
+                  <Alert
+                    severity="success"
+                    sx={{
+                      bgcolor: alpha(palette.pistachio, 0.15),
+                      color: palette.mocha,
+                      border: `1px solid ${alpha(palette.pistachio, 0.4)}`,
+                      borderRadius: 3,
+                      "& .MuiAlert-icon": { color: palette.pistachio },
+                    }}
+                  >
+                    {message ||
+                      "You're on the list! We'll notify you when RSVP opens. 💌"}
+                  </Alert>
+                ) : (
+                  <Box
+                    component="form"
+                    onSubmit={handleSubmit}
+                    aria-label="Email notification signup"
+                    sx={{
+                      display: "flex",
+                      gap: 1,
+                      flexDirection: { xs: "column", sm: "row" },
+                      maxWidth: 420,
+                      mx: "auto",
+                    }}
+                  >
+                    <TextField
+                      id="notify-email"
+                      type="email"
+                      placeholder="your@email.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      fullWidth
+                      size="small"
+                      autoComplete="email"
+                      disabled={status === "loading"}
+                      // inputProps={{ "aria-label": "Your email address" }}
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          borderRadius: { xs: 3, sm: "50px 0 0 50px" },
+                        },
+                      }}
+                    />
+                    <Button
+                      type="submit"
+                      variant="contained"
+                      color="primary"
+                      disabled={status === "loading"}
+                      id="notify-submit"
+                      sx={{
+                        borderRadius: { xs: 3, sm: "0 50px 50px 0" },
+                        px: 2.5,
+                        whiteSpace: "nowrap",
+                        minWidth: 120,
+                      }}
+                    >
+                      {status === "loading" ? (
+                        <CircularProgress
+                          size={18}
+                          sx={{ color: palette.ivory }}
+                        />
+                      ) : (
+                        "Notify Me"
+                      )}
+                    </Button>
+                  </Box>
+                )}
+
+                {status === "error" && (
+                  <Alert
+                    severity="error"
+                    sx={{ mt: 1.5, borderRadius: 3, maxWidth: 420, mx: "auto" }}
+                  >
+                    {message}
+                  </Alert>
+                )}
+
+                <Divider
+                  sx={{ borderColor: alpha(palette.beige, 0.4), my: 3 }}
+                />
+              </>
+            )}
 
             {/* Direct contact */}
             {/* <Typography variant="body2" sx={{ mb: 0.5 }}>
               Or contact us directly:
-            </Typography> */}
-            {/* <Link
-              href="mailto:williamandsweet2027@gmail.com"
+            </Typography>
+            <Link
+              href={CONTACT_EMAIL}
               sx={{
                 fontSize: "0.88rem",
                 color: palette.hazelnut,
@@ -295,7 +275,7 @@ const Rsvp = () => {
                 "&:hover": { color: palette.mocha },
               }}
             >
-              williamandsweet2027@gmail.com
+              {CONTACT_EMAIL}
             </Link> */}
           </CardContent>
         </Card>

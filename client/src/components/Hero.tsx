@@ -4,6 +4,7 @@ import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import { alpha } from "@mui/material/styles";
 import { palette } from "../theme/weddingTheme";
+import { IS_RSVP_ENABLED } from "../utils/constants";
 
 // ── Petal physics constants ───────────────────────────
 const PETAL_COUNT = 38;
@@ -403,21 +404,23 @@ const Hero = () => {
           Sts. Joachim &amp; Ann Parish &middot; Aldergrove, BC
         </Typography>
 
-        <Box sx={{ opacity: 0, animation: "fadeUp 0.8s ease 1.2s forwards" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            size="large"
-            onClick={() => handleScroll("#rsvp")}
-            sx={{
-              px: 4,
-              backdropFilter: "blur(4px)",
-              WebkitBackdropFilter: "blur(4px)",
-            }}
-          >
-            RSVP
-          </Button>
-        </Box>
+        {IS_RSVP_ENABLED && (
+          <Box sx={{ opacity: 0, animation: "fadeUp 0.8s ease 1.2s forwards" }}>
+            <Button
+              variant="contained"
+              color="primary"
+              size="large"
+              onClick={() => handleScroll("#rsvp")}
+              sx={{
+                px: 4,
+                backdropFilter: "blur(4px)",
+                WebkitBackdropFilter: "blur(4px)",
+              }}
+            >
+              RSVP
+            </Button>
+          </Box>
+        )}
       </Box>
 
       {/* ── Layer 5: Scroll indicator ───────────────── */}
