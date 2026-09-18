@@ -64,9 +64,10 @@ const RsvpSchema = new Schema<IRsvp>(
 // Index for quick admin lookup
 RsvpSchema.index({ email: 1 });
 RsvpSchema.index({ attending: 1 });
+// Compound unique index for guest identity
 RsvpSchema.index(
   { firstname: 1, lastname: 1 },
-  { collation: { locale: "en", strength: 2 } },
+  { unique: true, collation: { locale: "en", strength: 2 } },
 );
 
 export const Rsvp = model<IRsvp>("Rsvp", RsvpSchema);

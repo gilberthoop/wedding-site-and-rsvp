@@ -36,8 +36,11 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
       message,
     } = req.body;
 
+    const fn = typeof firstname === "string" ? firstname.trim() : "";
+    const ln = typeof lastname === "string" ? lastname.trim() : "";
+
     // Basic validation
-    if (!firstname || !email || !attending) {
+    if (!fn || !email || !attending) {
       res.status(400).json({
         success: false,
         message: "First name, email, and attending status are required.",
@@ -45,23 +48,32 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
       return;
     }
 
-    // Check for duplicate submission by email
-    const existing = await Rsvp.findOne({
-      email: email.toLowerCase().trim(),
-    }).lean();
+    // Check for duplicate submission by guest identity (firstname and lastname)
+    const duplicateQuery: Record<string, any> = {
+      firstname: { $regex: new RegExp(`^${escapeRegex(fn)}$`, "i") },
+    };
+    if (ln) {
+      duplicateQuery.lastname = {
+        $regex: new RegExp(`^${escapeRegex(ln)}$`, "i"),
+      };
+    } else {
+      duplicateQuery.lastname = { $in: ["", null, undefined] };
+    }
+
+    const existing = await Rsvp.findOne(duplicateQuery).lean();
     if (existing) {
       res.status(409).json({
         success: false,
         message:
-          "We already received an RSVP from this email. Please contact us directly to make changes.",
+          "We already received an RSVP for this guest. If you need to make changes, please contact us directly at sweetmango0508@gmail.com",
       });
       return;
     }
 
     const rsvp = await Rsvp.create({
-      firstname,
-      lastname,
-      email,
+      firstname: fn,
+      lastname: ln,
+      email: email.toLowerCase().trim(),
       attending,
       dietaryRestrictions,
       songRequest,
@@ -76,7 +88,15 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
           : "Thank you for letting us know. If you change your mind and would like to join us, please let us know at sweetmango0508@gmail.com",
       id: rsvp._id,
     });
-  } catch (err) {
+  } catch (err: any) {
+    if (err?.code === 11000) {
+      res.status(409).json({
+        success: false,
+        message:
+          "We already received an RSVP for this guest. If you need to make changes, please contact us directly at sweetmango0508@gmail.com",
+      });
+      return;
+    }
     next(err);
   }
 });
