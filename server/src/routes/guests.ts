@@ -1,5 +1,6 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { Guest } from "../models/Guest";
+import { findBestGuestMatch } from "../utils/fuzzyMatch";
 
 const router = Router();
 
@@ -70,7 +71,7 @@ router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
 
 /**
  * GET /api/guests/search?firstname=...&lastname=...
- * Search guest by query params
+ * Search guest by query params with fuzzy matching fallback
  */
 router.get(
   "/search",
@@ -79,25 +80,31 @@ router.get(
       const firstname = (req.query.firstname as string) || "";
       const lastname = (req.query.lastname as string) || "";
 
-      if (!firstname.trim()) {
+      if (!firstname.trim() || !lastname.trim()) {
         return res.status(400).json({
           success: false,
-          message: "First name is required.",
+          message: "First name and last name are required.",
         });
       }
 
-      const query: Record<string, any> = {
+      // 1. Attempt exact case-insensitive regex search
+      const exactMatch = await Guest.findOne({
         firstname: { $regex: new RegExp(`^${escapeRegex(firstname)}$`, "i") },
-      };
-      if (lastname.trim()) {
-        query.lastname = {
-          $regex: new RegExp(`^${escapeRegex(lastname)}$`, "i"),
-        };
+        lastname: { $regex: new RegExp(`^${escapeRegex(lastname)}$`, "i") },
+      }).lean();
+
+      if (exactMatch) {
+        return res.json({
+          success: true,
+          data: exactMatch,
+        });
       }
 
-      const guest = await Guest.findOne(query).lean();
+      // 2. Fallback to fuzzy matching across guest list
+      const allGuests = await Guest.find().lean();
+      const fuzzyMatch = findBestGuestMatch(firstname, lastname, allGuests);
 
-      if (!guest) {
+      if (!fuzzyMatch) {
         return res.status(404).json({
           success: false,
           message: "Guest not found.",
@@ -106,7 +113,7 @@ router.get(
 
       res.json({
         success: true,
-        data: guest,
+        data: fuzzyMatch,
       });
     } catch (err) {
       next(err);

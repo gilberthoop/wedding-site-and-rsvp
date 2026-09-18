@@ -73,7 +73,7 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
       message:
         attending === "yes"
           ? "We can't wait to celebrate with you! 🎉"
-          : "Thank you for letting us know. We'll miss you!",
+          : "Thank you for letting us know. If you change your mind and would like to join us, please let us know at sweetmango0508@gmail.com",
       id: rsvp._id,
     });
   } catch (err) {

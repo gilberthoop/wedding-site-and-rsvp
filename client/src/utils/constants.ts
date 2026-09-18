@@ -1,11 +1,12 @@
 import { StoryNode } from "./types/home";
+import { DietaryOption } from "./types/rsvp";
 
 export const IS_NOTIFICATIONS_ENABLED =
   import.meta.env.VITE_APP_NOTIFICATIONS_ENABLED === "true";
 
 export const IS_RSVP_ENABLED = import.meta.env.VITE_APP_RSVP_ENABLED === "true";
 
-export const CONTACT_EMAIL = "williamgilbertgo@gmail.com";
+export const CONTACT_EMAIL = "sweetmango0508@gmail.com";
 
 // region Our Story
 export const STORY_NODES: StoryNode[] = [
@@ -31,5 +32,16 @@ export const STORY_NODES: StoryNode[] = [
     imgSrc: "/images/story/church.jpg",
     imgAlt: "Add a save the date photo",
   },
+];
+// endregion
+
+// region RSVP
+export const DIETARY_OPTIONS: DietaryOption[] = [
+  { id: "vegetarian", label: "Vegetarian" },
+  { id: "gluten-free", label: "Gluten-Free / Celiac" },
+  { id: "dairy-free", label: "Dairy-Free / Lactose Intolerant" },
+  { id: "nut-allergy", label: "Nut Allergy (Peanuts / Tree Nuts)" },
+  { id: "shellfish", label: "Shellfish / Seafood Allergy" },
+  { id: "kids-meal", label: "Kid's Meal (for children)" },
 ];
 // endregion
