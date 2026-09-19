@@ -9,7 +9,7 @@ export type Attendance = "yes" | "no";
 
 export interface RSVPDetails {
   firstname: string;
-  lastname?: string;
+  lastname: string;
   email: string;
   attending: Attendance;
   dietaryRestrictions?: string;
