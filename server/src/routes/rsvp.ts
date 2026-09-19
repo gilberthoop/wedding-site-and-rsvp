@@ -165,4 +165,60 @@ router.get(
   },
 );
 
+/**
+ * GET /api/rsvp/:id
+ * Find an RSVP by ID
+ */
+router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    const rsvp = await Rsvp.findById(id).lean();
+
+    if (!rsvp) {
+      return res.status(404).json({
+        success: false,
+        message: "RSVP not found.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: rsvp,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+/**
+ * PUT /api/rsvp/:id
+ * Updates an RSVP by ID
+ */
+router.put("/:id", async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+    const { attending, dietaryRestrictions, songRequest, message } = req.body;
+
+    const rsvp = await Rsvp.findByIdAndUpdate(
+      id,
+      { attending, dietaryRestrictions, songRequest, message },
+      { new: true },
+    );
+    if (!rsvp) {
+      return res.status(404).json({
+        success: false,
+        message: "RSVP not found.",
+      });
+    }
+    res.json({
+      success: true,
+      message: "RSVP updated successfully",
+      data: rsvp,
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
 export default router;
