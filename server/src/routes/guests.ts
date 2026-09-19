@@ -121,4 +121,41 @@ router.get(
   },
 );
 
+/**
+ * DELETE /api/guests/:id
+ * Delete a guest
+ */
+router.delete(
+  "/:id",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "Guest ID is required.",
+        });
+      }
+
+      const guest = await Guest.findByIdAndDelete(id).lean();
+
+      if (!guest) {
+        return res.status(404).json({
+          success: false,
+          message: "Guest not found.",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "Guest deleted successfully",
+        data: guest,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;

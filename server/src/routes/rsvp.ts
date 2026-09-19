@@ -221,4 +221,41 @@ router.put("/:id", async (req: Request, res: Response, next: NextFunction) => {
   }
 });
 
+/**
+ * DELETE /api/rsvp/:id
+ * Delete an RSVP
+ */
+router.delete(
+  "/:id",
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "RSVP ID is required.",
+        });
+      }
+
+      const rsvp = await Rsvp.findByIdAndDelete(id).lean();
+
+      if (!rsvp) {
+        return res.status(404).json({
+          success: false,
+          message: "RSVP not found.",
+        });
+      }
+
+      res.json({
+        success: true,
+        message: "RSVP deleted successfully",
+        data: rsvp,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
 export default router;
