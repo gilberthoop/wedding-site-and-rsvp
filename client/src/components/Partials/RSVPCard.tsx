@@ -21,6 +21,7 @@ import { submitRsvp, findRsvpByName } from "../../utils/helpers/rsvp";
 import { FormResponse, RSVPDetails, Attendance } from "../../utils/types/rsvp";
 import { GuestEntry } from "../../utils/types/guests";
 import { CONTACT_EMAIL, DIETARY_OPTIONS } from "../../utils/constants";
+import { sanitizeNameInput, sanitizeTextInput } from "../../utils/helpers/form";
 
 enum Step {
   verify = "verify",
@@ -99,10 +100,16 @@ export const RSVPCard = () => {
     };
   }, []);
 
-  const attendanceStatus: string =
+  const attendanceStatus: string[] =
     attending === "yes"
-      ? "You are attending to the wedding. See you on May 8, 2027!"
-      : `We will miss you! If you change your mind and would like to join us, please let us know at ${CONTACT_EMAIL}`;
+      ? [
+          "You are attending to the wedding. See you on May 8, 2027!",
+          `If you need to make changes to your RSVP, please email us at ${CONTACT_EMAIL}.`,
+        ]
+      : [
+          "We will miss you!",
+          `If you change your mind and would like to join us, please let us know at ${CONTACT_EMAIL}`,
+        ];
 
   const resetFields = (): void => {
     setFirstname("");
@@ -119,14 +126,17 @@ export const RSVPCard = () => {
 
   const handleVerifyGuest = async (e: FormEvent) => {
     e.preventDefault();
-    if (!firstname.trim() || !lastname.trim()) return;
+    const sanitizedFirstname = sanitizeNameInput(firstname);
+    const sanitizedLastName = sanitizeNameInput(lastname);
+
+    if (!sanitizedFirstname || !sanitizedLastName) return;
     setFormResponse({ message: "", status: "info" });
 
     try {
       setLoading(true);
       const guest: GuestEntry | null = await findGuestByName(
-        firstname,
-        lastname,
+        sanitizedFirstname,
+        sanitizedLastName,
       );
       if (!guest) {
         setFormResponse({
@@ -212,19 +222,19 @@ export const RSVPCard = () => {
       // Assemble composite dietary restrictions string
       const dietaryList = [...selectedDietary];
       if (hasOtherDietary && otherDietaryText.trim()) {
-        dietaryList.push(`Other: ${otherDietaryText.trim()}`);
+        dietaryList.push(`Other: ${sanitizeTextInput(otherDietaryText)}`);
       }
       const formattedDietary =
         dietaryList.length > 0 ? dietaryList.join(", ") : "None";
 
       const payload: RSVPDetails = {
-        firstname: firstname.trim(),
-        lastname: lastname.trim() || undefined,
+        firstname: sanitizeNameInput(firstname),
+        lastname: sanitizeNameInput(lastname),
         email: email.trim(),
         attending,
         dietaryRestrictions: formattedDietary,
-        songRequest: songRequest.trim() || undefined,
-        message: message.trim() || undefined,
+        songRequest: sanitizeTextInput(songRequest) || undefined,
+        message: sanitizeTextInput(message) || undefined,
       };
       const response: string = await submitRsvp(payload);
       setFormResponse({
@@ -288,24 +298,21 @@ export const RSVPCard = () => {
             component="form"
             onSubmit={handleVerifyGuest}
             aria-label="Guest name verification"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              rowGap: 3,
+            }}
           >
             <Typography
               variant="h5"
-              sx={{ mb: 0.5, textAlign: "center", fontWeight: 600 }}
+              sx={{
+                textAlign: "center",
+                fontWeight: 600,
+              }}
             >
               Find Your Invitation
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 3,
-                textAlign: "center",
-                color: alpha(palette.mocha, 0.7),
-              }}
-            >
-              Enter your name exactly as it appears on your invitation.
-            </Typography>
-
             <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
               <TextField
                 id="rsvp-firstname"
@@ -342,7 +349,6 @@ export const RSVPCard = () => {
               fullWidth
               disabled={!firstname.trim() || !lastname.trim()}
               sx={{
-                mt: 3,
                 py: 1.4,
                 borderRadius: 3,
                 fontSize: "1rem",
@@ -660,16 +666,19 @@ export const RSVPCard = () => {
             >
               Hello, {firstname}!
             </Typography>
-            <Typography
-              variant="body2"
-              sx={{
-                mb: 3,
-                textAlign: "center",
-                color: alpha(palette.mocha, 0.7),
-              }}
-            >
-              {attendanceStatus}
-            </Typography>
+            {attendanceStatus.map((message, idx) => (
+              <Typography
+                key={`rsvp-${idx}`}
+                variant="body2"
+                sx={{
+                  mb: 3,
+                  textAlign: "center",
+                  color: alpha(palette.mocha, 0.7),
+                }}
+              >
+                {message}
+              </Typography>
+            ))}
 
             {/* More RSVP details */}
             {dietaryRestrictions && dietaryRestrictions !== "None" && (
