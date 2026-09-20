@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://server-chi-peach.vercel.app/api/:path*"
+    }
+  ]
+}

@@ -28,12 +28,27 @@ const app = express();
 
 // Security & parsing middleware
 app.use(helmet());
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://sweetmango-six.vercel.app",
+  ...(process.env.CLIENT_ORIGIN
+    ? process.env.CLIENT_ORIGIN.split(",").map((s) => s.trim())
+    : []),
+];
+
 app.use(
   cors({
-    origin:
-      process.env.NODE_ENV === "production"
-        ? process.env.CLIENT_ORIGIN || "https://yourdomain.com"
-        : "http://localhost:5173",
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+      if (
+        allowedOrigins.includes(origin) ||
+        /^https:\/\/sweetmango[a-zA-Z0-9-]*\.vercel\.app$/.test(origin)
+      ) {
+        return callback(null, true);
+      }
+      return callback(null, false);
+    },
     credentials: true,
   }),
 );
