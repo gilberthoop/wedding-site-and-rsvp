@@ -8,6 +8,14 @@ export const IS_RSVP_ENABLED = import.meta.env.VITE_APP_RSVP_ENABLED === "true";
 
 export const CONTACT_EMAIL = "sweetmango0508@gmail.com";
 
+export const NAV_LINKS = [
+  { label: "Our Story", href: "#our-story" },
+  { label: "Details", href: "#details" },
+  { label: "Gallery", href: "#gallery" },
+  // { label: 'Wedding Party', href: '#wedding-party' },
+  { label: "RSVP", href: "#rsvp" },
+];
+
 // region Our Story
 export const STORY_NODES: StoryNode[] = [
   {
@@ -48,12 +56,12 @@ export const DIETARY_OPTIONS: DietaryOption[] = [
 
 // region Gallery
 const galleryImageModules = import.meta.glob<string>(
-  '/public/images/gallery/**/*.{jpg,jpeg,png,webp,avif,gif,JPG,JPEG,PNG,WEBP,AVIF,GIF}',
-  { eager: true, query: '?url', import: 'default' }
+  "/public/images/gallery/**/*.{jpg,jpeg,png,webp,avif,gif,JPG,JPEG,PNG,WEBP,AVIF,GIF}",
+  { eager: true, query: "?url", import: "default" },
 );
 
 // Rhythm for varied masonry layout cards
-const MASONRY_PATTERN: Array<Pick<GallerySlot, 'tall' | 'wide'>> = [
+const MASONRY_PATTERN: Array<Pick<GallerySlot, "tall" | "wide">> = [
   { tall: true },
   {},
   {},
@@ -80,27 +88,27 @@ for (let i = randomizedImageEntries.length - 1; i > 0; i--) {
 
 export const GALLERY_SLOTS: GallerySlot[] = randomizedImageEntries.map(
   ([key, rawSrc], index) => {
-    const relPath = key.replace(/^\/public\/images\/gallery\//, '');
-    const parts = relPath.split('/');
+    const relPath = key.replace(/^\/public\/images\/gallery\//, "");
+    const parts = relPath.split("/");
     const folder = parts.length > 1 ? parts[0] : undefined;
     const fileName = parts[parts.length - 1];
     const layout = MASONRY_PATTERN[index % MASONRY_PATTERN.length];
 
     const srcString =
-      typeof rawSrc === 'string'
+      typeof rawSrc === "string"
         ? rawSrc
         : (rawSrc as { default?: string })?.default || key;
     // Strip leading /public if present in dev so browser requests /images/...
-    const imgSrc = srcString.replace(/^\/public/, '');
+    const imgSrc = srcString.replace(/^\/public/, "");
 
     return {
       ...layout,
       delay: (index % 6) * 50,
       imgSrc,
-      alt: `Wedding memory - ${fileName.replace(/\.[^/.]+$/, '')}`,
+      alt: `Wedding memory - ${fileName.replace(/\.[^/.]+$/, "")}`,
       folder,
     };
-  }
+  },
 );
 
 // Backward-compatible SLOTS export
@@ -116,4 +124,3 @@ export const SLOTS: GallerySlot[] =
         { tall: true, delay: 300 },
       ];
 // endregion
-

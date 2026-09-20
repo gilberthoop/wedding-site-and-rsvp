@@ -120,17 +120,6 @@ const WeddingDetails = () => {
       ref={sectionRef as React.Ref<HTMLDivElement>}
       sx={{ bgcolor: palette.porcelain, py: { xs: 7, md: 10 }, px: 2 }}
     >
-      {/* Botanical divider */}
-      {/* <Box sx={{ textAlign: "center", mb: 4, opacity: 0.65 }}>
-        <Box
-          component="img"
-          src="/images/divider-botanical.png"
-          alt=""
-          aria-hidden
-          sx={{ maxWidth: 500, width: "100%", mx: "auto" }}
-        />
-      </Box> */}
-
       {/* Section header */}
       <Box
         data-reveal
@@ -179,9 +168,7 @@ const WeddingDetails = () => {
           delay={200}
         >
           <Typography variant="body1" sx={{ fontSize: "0.88rem" }}>
-            Ceremony time to be announced.
-            <br />
-            Please check back for updates.
+            Nuptial Mass at 2:00 PM. <br /> Reception at 6:00 PM.
           </Typography>
         </DetailCard>
 
@@ -205,8 +192,7 @@ const WeddingDetails = () => {
         <DetailCard
           icon={<CelebrationIcon fontSize="medium" />}
           title="Reception"
-          subtitle="Venue To Be Announced"
-          chip="Details Coming Soon"
+          subtitle="Sts. Joachim & Ann Reception Hall"
           delay={400}
         >
           <Typography variant="body1" sx={{ fontSize: "0.88rem" }}>
