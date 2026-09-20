@@ -13,7 +13,6 @@ export const NAV_LINKS = [
   { label: "Details", href: "#details" },
   { label: "Gallery", href: "#gallery" },
   // { label: 'Wedding Party', href: '#wedding-party' },
-  { label: "RSVP", href: "#rsvp" },
 ];
 
 // region Our Story
