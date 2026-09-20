@@ -22,14 +22,23 @@ export const useScrollReveal = (
     if (!container) return;
 
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const elements = container.querySelectorAll<HTMLElement>(selector);
+
+    const revealElement = (el: HTMLElement) => {
+      el.dataset.revealed = 'true';
+      el.style.opacity = '1';
+      el.style.transform = 'none';
+    };
 
     if (prefersReducedMotion) {
-      elements.forEach((el) => {
-        el.style.opacity = '1';
-        el.style.transform = 'none';
-      });
-      return;
+      const revealAll = () => {
+        const elements = container.querySelectorAll<HTMLElement>(selector);
+        elements.forEach(revealElement);
+      };
+      revealAll();
+
+      const mutationObserver = new MutationObserver(revealAll);
+      mutationObserver.observe(container, { childList: true, subtree: true });
+      return () => mutationObserver.disconnect();
     }
 
     const observer = new IntersectionObserver(
@@ -37,11 +46,19 @@ export const useScrollReveal = (
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             const el = entry.target as HTMLElement;
-            const delay = el.dataset.delay ? parseInt(el.dataset.delay) : 0;
-            setTimeout(() => {
+            el.dataset.revealed = 'true';
+            const delay = el.dataset.delay ? parseInt(el.dataset.delay, 10) : 0;
+            if (delay > 0) {
+              setTimeout(() => {
+                if (el.isConnected) {
+                  el.style.opacity = '1';
+                  el.style.transform = 'none';
+                }
+              }, delay);
+            } else {
               el.style.opacity = '1';
               el.style.transform = 'none';
-            }, delay);
+            }
             observer.unobserve(el);
           }
         });
@@ -49,8 +66,30 @@ export const useScrollReveal = (
       { threshold, rootMargin }
     );
 
-    elements.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+    const observeElements = () => {
+      const elements = container.querySelectorAll<HTMLElement>(selector);
+      elements.forEach((el) => {
+        if (el.dataset.revealed !== 'true') {
+          observer.observe(el);
+        }
+      });
+    };
+
+    observeElements();
+
+    const mutationObserver = new MutationObserver(() => {
+      observeElements();
+    });
+
+    mutationObserver.observe(container, {
+      childList: true,
+      subtree: true,
+    });
+
+    return () => {
+      observer.disconnect();
+      mutationObserver.disconnect();
+    };
   }, [selector, threshold, rootMargin]);
 
   useEffect(() => {
@@ -59,4 +98,4 @@ export const useScrollReveal = (
   }, [observe]);
 
   return containerRef;
-}
+};
