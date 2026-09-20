@@ -132,7 +132,13 @@ const PartyGroup = ({
       >
         {title}
       </Typography>
-      <Grid container spacing={2} justifyContent="center">
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          justifyContent: "center",
+        }}
+      >
         {members.map((m, i) => (
           <MemberCard
             key={`${m.role}-${i}`}
