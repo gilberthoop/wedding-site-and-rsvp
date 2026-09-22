@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import AppBar from "@mui/material/AppBar";
 import Toolbar from "@mui/material/Toolbar";
 import Box from "@mui/material/Box";
@@ -93,56 +93,63 @@ const Navbar = () => {
           {/* Desktop nav links */}
           {!isMobile && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 3.5 }}>
-              {NAV_LINKS.map((link) => (
-                <Typography
-                  key={link.href}
-                  component="a"
-                  href={link.href}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleNavClick(link.href);
-                  }}
-                  sx={{
-                    fontFamily: '"Jost", sans-serif',
-                    fontSize: "0.72rem",
-                    fontWeight: 500,
-                    letterSpacing: "0.16em",
-                    textTransform: "uppercase",
-                    color: palette.mocha,
-                    position: "relative",
-                    cursor: "pointer",
-                    "&::after": {
-                      content: '""',
-                      position: "absolute",
-                      bottom: -3,
-                      left: 0,
-                      width: "0%",
-                      height: "1px",
-                      background: palette.tan,
-                      transition: "width 0.3s ease",
-                    },
-                    "&:hover": { color: palette.hazelnut },
-                    "&:hover::after": { width: "100%" },
-                    transition: "color 0.3s ease",
-                  }}
-                >
-                  {link.label}
-                </Typography>
-              ))}
-
-              <Button
-                href="#rsvp"
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavClick("#rsvp");
-                }}
-                variant="outlined"
-                color="primary"
-                size="small"
-                sx={{ borderRadius: 50, fontSize: "0.7rem", px: 2.2, py: 0.6 }}
-              >
-                RSVP
-              </Button>
+              {NAV_LINKS.map((link) =>
+                <React.Fragment key={link.href}>
+                  {
+                    link.label === "RSVP"
+                      ? (
+                        <Button
+                          href={link.href}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleNavClick(link.href);
+                          }}
+                          variant="outlined"
+                          color="primary"
+                          size="small"
+                          sx={{ borderRadius: 50, fontSize: "0.7rem", px: 2.2, py: 0.6 }}
+                        >
+                          {link.label}
+                        </Button>
+                      )
+                      : (
+                        <Typography
+                          component="a"
+                          href={link.href}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            handleNavClick(link.href);
+                          }}
+                          sx={{
+                            fontFamily: '"Jost", sans-serif',
+                            fontSize: "0.72rem",
+                            fontWeight: 500,
+                            letterSpacing: "0.16em",
+                            textTransform: "uppercase",
+                            color: palette.mocha,
+                            position: "relative",
+                            cursor: "pointer",
+                            "&::after": {
+                              content: '""',
+                              position: "absolute",
+                              bottom: -3,
+                              left: 0,
+                              width: "0%",
+                              height: "1px",
+                              background: palette.tan,
+                              transition: "width 0.3s ease",
+                            },
+                            "&:hover": { color: palette.hazelnut },
+                            "&:hover::after": { width: "100%" },
+                            transition: "color 0.3s ease",
+                          }}
+                        >
+                          {link.label}
+                        </Typography>
+                      )
+                  }
+                </React.Fragment>
+              )}
             </Box>
           )}
 
