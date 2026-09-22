@@ -31,7 +31,7 @@ const Rsvp = () => {
         aria-hidden
         sx={{
           position: "absolute",
-          right: { xs: -80, md: -40 },
+          left: { xs: -80, md: -40 },
           top: "50%",
           transform: "translateY(-50%)",
           width: { xs: 280, md: 380 },
@@ -141,6 +141,24 @@ const Rsvp = () => {
           </Card>
         )}
       </Box>
+
+      {/* Background floral (faint) */}
+      <Box
+        component="img"
+        src="/images/floral-hero.png"
+        alt=""
+        aria-hidden
+        sx={{
+          position: "absolute",
+          right: { xs: -80, md: -40 },
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: { xs: 280, md: 380 },
+          opacity: 0.08,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
     </Box>
   );
 };
