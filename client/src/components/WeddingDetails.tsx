@@ -44,6 +44,8 @@ const DetailCard = ({
           opacity: 0,
           transform: "translateY(30px)",
           transition: "opacity 0.7s ease, transform 0.7s ease",
+          position: "relative",
+          zIndex: 1,
         }}
       >
         <CardContent
@@ -118,8 +120,32 @@ const WeddingDetails = () => {
       id="details"
       component="section"
       ref={sectionRef as React.Ref<HTMLDivElement>}
-      sx={{ bgcolor: palette.porcelain, py: { xs: 7, md: 10 }, px: 2 }}
+      sx={{
+        bgcolor: palette.porcelain,
+        py: { xs: 7, md: 10 },
+        px: 2,
+        position: "relative",
+        overflow: "hidden"
+      }}
     >
+      {/* Background floral (faint) */}
+      <Box
+        component="img"
+        src="/images/floral-hero.png"
+        alt=""
+        aria-hidden
+        sx={{
+          position: "absolute",
+          left: { xs: -80, md: -40 },
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: { xs: 280, md: 380 },
+          opacity: 0.08,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
+
       {/* Section header */}
       <Box
         data-reveal
@@ -200,6 +226,24 @@ const WeddingDetails = () => {
           </Typography>
         </DetailCard>
       </Grid>
+
+      {/* Background floral (faint) */}
+      <Box
+        component="img"
+        src="/images/floral-hero.png"
+        alt=""
+        aria-hidden
+        sx={{
+          position: "absolute",
+          right: { xs: -80, md: -40 },
+          top: "50%",
+          transform: "translateY(-50%)",
+          width: { xs: 280, md: 380 },
+          opacity: 0.08,
+          pointerEvents: "none",
+          zIndex: 0,
+        }}
+      />
     </Box>
   );
 };

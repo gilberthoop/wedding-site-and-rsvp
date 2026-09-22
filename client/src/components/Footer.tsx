@@ -19,7 +19,7 @@ const Footer = () => {
       {/* Background floral (very faint) */}
       <Box
         component="img"
-        src="/images/floral-corner.png"
+        src="/images/floral-hero.png"
         alt=""
         aria-hidden
         sx={{
@@ -48,7 +48,7 @@ const Footer = () => {
         <Typography
           variant="caption"
           sx={{
-            color: alpha(palette.dove, 0.8),
+            color: palette.nude,
             letterSpacing: "0.18em",
             display: "block",
             mb: 2,
@@ -83,21 +83,10 @@ const Footer = () => {
           />
         </Box>
 
-        {/* <Typography
-          variant="subtitle1"
-          sx={{
-            color: alpha(palette.beige, 0.7),
-            fontSize: "1rem",
-            mb: 2,
-          }}
-        >
-          #WilliamAndSweet2027
-        </Typography> */}
-
         <Typography
           variant="caption"
           sx={{
-            color: alpha(palette.dove, 0.3),
+            color: palette.nude,
             letterSpacing: "0.1em",
             display: "block",
           }}
@@ -105,6 +94,23 @@ const Footer = () => {
           Made with love for our wedding day
         </Typography>
       </Box>
+
+      {/* Background floral (very faint) */}
+      <Box
+        component="img"
+        src="/images/floral-hero.png"
+        alt=""
+        aria-hidden
+        sx={{
+          position: "absolute",
+          bottom: -30,
+          right: -60,
+          width: 280,
+          opacity: 0.07,
+          transform: "scaleX(-1)",
+          pointerEvents: "none",
+        }}
+      />
     </Box>
   );
 };
