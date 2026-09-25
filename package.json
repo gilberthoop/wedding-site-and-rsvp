@@ -10,7 +10,8 @@
     "build": "npm run build --workspace=client && npm run build --workspace=server",
     "start": "npm run start --workspace=server",
     "typecheck": "npm run typecheck --workspace=client && npm run typecheck --workspace=server",
-    "seed:guests": "npm run seed:guests --workspace=server"
+    "seed:guests": "npm run seed:guests --workspace=server",
+    "seed:admin": "npm run seed:admin --workspace=server"
   },
   "devDependencies": {
     "concurrently": "^8.2.2"
