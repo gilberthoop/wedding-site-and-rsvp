@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Card from "@mui/material/Card";
@@ -5,10 +6,13 @@ import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Link from "@mui/material/Link";
 import Grid from "@mui/material/Grid";
+import Dialog from "@mui/material/Dialog";
+import IconButton from "@mui/material/IconButton";
 import PlaceIcon from "@mui/icons-material/Place";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import DiamondIcon from "@mui/icons-material/Diamond";
 import CelebrationIcon from "@mui/icons-material/Celebration";
+import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
 import { palette } from "../theme/weddingTheme";
 import { useScrollReveal } from "../hooks/useScrollReveal";
 import { alpha } from "@mui/material/styles";
@@ -20,6 +24,7 @@ interface DetailCardProps {
   children: React.ReactNode;
   chip?: string;
   link?: { label: string; href: string };
+  action?: { label: string; onClick: () => void };
   delay?: number;
 }
 
@@ -30,6 +35,7 @@ const DetailCard = ({
   children,
   chip,
   link,
+  action,
   delay = 0,
 }: DetailCardProps) => {
   return (
@@ -106,6 +112,34 @@ const DetailCard = ({
               {link.label} →
             </Link>
           )}
+          {action && (
+            <Link
+              component="button"
+              type="button"
+              onClick={action.onClick}
+              sx={{
+                fontSize: "0.78rem",
+                fontWeight: 500,
+                letterSpacing: "0.08em",
+                color: palette.hazelnut,
+                bgcolor: "transparent",
+                border: "none",
+                borderBottom: `1px solid ${palette.beige}`,
+                cursor: "pointer",
+                p: 0,
+                fontFamily: "inherit",
+                display: "inline-flex",
+                alignItems: "center",
+                transition: "color 0.2s ease, border-color 0.2s ease",
+                "&:hover": {
+                  color: palette.mocha,
+                  borderBottomColor: palette.hazelnut,
+                },
+              }}
+            >
+              {action.label} →
+            </Link>
+          )}
         </CardContent>
       </Card>
     </Grid>
@@ -114,6 +148,7 @@ const DetailCard = ({
 
 const WeddingDetails = () => {
   const sectionRef = useScrollReveal("[data-reveal]");
+  const [isPaletteModalOpen, setIsPaletteModalOpen] = useState(false);
 
   return (
     <Box
@@ -125,7 +160,7 @@ const WeddingDetails = () => {
         py: { xs: 7, md: 10 },
         px: 2,
         position: "relative",
-        overflow: "hidden"
+        overflow: "hidden",
       }}
     >
       {/* Background floral (faint) */}
@@ -203,16 +238,59 @@ const WeddingDetails = () => {
           title="Dress Code"
           subtitle="Formal Attire"
           delay={300}
+          action={{
+            label: "View Color Palette",
+            onClick: () => setIsPaletteModalOpen(true),
+          }}
         >
-          <Typography variant="body1" sx={{ fontSize: "0.88rem" }}>
+          <Typography variant="body1" sx={{ fontSize: "0.88rem", mb: 1 }}>
             Traditional Filipino Wear or Neutral Tones are warmly encouraged.
           </Typography>
-          <Typography
-            variant="body2"
-            sx={{ fontSize: "0.78rem", fontStyle: "italic", mt: 1 }}
+          <Box
+            component="button"
+            type="button"
+            onClick={() => setIsPaletteModalOpen(true)}
+            aria-label="View neutral color palette guide"
+            sx={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 0.6,
+              p: "4px 10px",
+              borderRadius: "16px",
+              bgcolor: alpha(palette.nude, 0.25),
+              border: `1px solid ${alpha(palette.beige, 0.5)}`,
+              cursor: "pointer",
+              transition: "all 0.2s ease",
+              "&:hover": {
+                transform: "translateY(-1px)",
+                bgcolor: alpha(palette.nude, 0.45),
+                borderColor: palette.hazelnut,
+              },
+            }}
           >
-            Maria Clara / Terno is exclusively reserved for the Bride.
-          </Typography>
+            {[
+              palette.ivory,
+              palette.porcelain,
+              palette.nude,
+              palette.blushNude,
+              palette.beige,
+              palette.tan,
+              palette.dove,
+              palette.mocha,
+              palette.hazelnut,
+            ].map((color, idx) => (
+              <Box
+                key={idx}
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  bgcolor: color,
+                  border: "1px solid rgba(0, 0, 0, 0.12)",
+                }}
+              />
+            ))}
+          </Box>
         </DetailCard>
 
         <DetailCard
@@ -226,6 +304,93 @@ const WeddingDetails = () => {
           </Typography>
         </DetailCard>
       </Grid>
+
+      {/* Dress Code / Color Palette Modal */}
+      <Dialog
+        open={isPaletteModalOpen}
+        onClose={() => setIsPaletteModalOpen(false)}
+        maxWidth="xs"
+        fullWidth
+        aria-labelledby="attire-palette-title"
+        slotProps={{
+          backdrop: {
+            sx: {
+              bgcolor: alpha(palette.chocolate, 0.72),
+              backdropFilter: "blur(6px)",
+            },
+          },
+          paper: {
+            sx: {
+              bgcolor: palette.ivory,
+              borderRadius: 3,
+              p: { xs: 2.5, sm: 3 },
+              position: "relative",
+              overflow: "hidden",
+              border: `1px solid ${alpha(palette.beige, 0.5)}`,
+              boxShadow: "0 24px 48px rgba(61, 28, 13, 0.3)",
+              m: 2,
+            },
+          },
+        }}
+      >
+        <IconButton
+          aria-label="Close color palette modal"
+          onClick={() => setIsPaletteModalOpen(false)}
+          sx={{
+            position: "absolute",
+            top: 12,
+            right: 12,
+            color: palette.mocha,
+            bgcolor: alpha(palette.porcelain, 0.7),
+            "&:hover": {
+              bgcolor: palette.cream,
+              color: palette.chocolate,
+            },
+            zIndex: 1,
+          }}
+        >
+          <CloseRoundedIcon fontSize="small" />
+        </IconButton>
+
+        <Box sx={{ textAlign: "center", mb: 2, px: 2 }}>
+          <Typography
+            id="attire-palette-title"
+            variant="h4"
+            sx={{
+              fontSize: { xs: "1.35rem", sm: "1.55rem" },
+              color: palette.chocolate,
+              mb: 0.5,
+            }}
+          >
+            Guest Attire Inspiration
+          </Typography>
+        </Box>
+
+        <Box
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            bgcolor: "#FFFFFF",
+            border: `1px solid ${alpha(palette.beige, 0.35)}`,
+            display: "flex",
+            justifyContent: "center",
+            boxShadow: "inset 0 0 0 1px rgba(0,0,0,0.03)",
+          }}
+        >
+          <Box
+            component="img"
+            src="/images/attire/Neutral%20tones.png"
+            alt="Wedding attire neutral color palette: Ivory, Porcelain, Nude, Blush Nude, Beige, Tan, Dove, Mocha, Hazelnut"
+            sx={{
+              width: "100%",
+              height: "auto",
+              maxHeight: { xs: "60vh", sm: "65vh" },
+              objectFit: "contain",
+              display: "block",
+            }}
+          />
+        </Box>
+      </Dialog>
 
       {/* Background floral (faint) */}
       <Box
