@@ -12,6 +12,7 @@ import mongoose from "mongoose";
 import notificationRoutes from "./routes/notifications";
 import rsvpRoutes from "./routes/rsvp";
 import guestRoutes from "./routes/guests";
+import adminRoutes from "./routes/admin";
 import { errorHandler } from "./middleware/errorHandler";
 
 const PORT = process.env.PORT || 8080;
@@ -59,6 +60,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/rsvp", rsvpRoutes);
 app.use("/api/guests", guestRoutes);
+app.use("/api/admin", adminRoutes);
 
 // Health check
 app.get("/api/health", (_req, res) => {
