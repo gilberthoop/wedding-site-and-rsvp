@@ -3,6 +3,10 @@
     {
       "source": "/api/:path*",
       "destination": "https://server-chi-peach.vercel.app/api/:path*"
+    },
+    {
+      "source": "/((?!api/|images/|assets/|favicon|site\\.webmanifest|.*\\..*).*)",
+      "destination": "/index.html"
     }
   ]
 }
