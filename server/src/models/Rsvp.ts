@@ -1,6 +1,6 @@
 import { Schema, model, Document } from "mongoose";
 
-export type AttendingStatus = "yes" | "no" | "maybe";
+export type AttendingStatus = "yes" | "no";
 
 export interface IRsvp extends Document {
   firstname: string;
@@ -36,7 +36,7 @@ const RsvpSchema = new Schema<IRsvp>(
     },
     attending: {
       type: String,
-      enum: ["yes", "no", "maybe"],
+      enum: ["yes", "no"],
       required: [true, "Attending status is required"],
     },
     dietaryRestrictions: {
