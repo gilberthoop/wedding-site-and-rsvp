@@ -1,5 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
+import mongoose from "mongoose";
 import { Rsvp } from "../models/Rsvp";
+import { requireAdminAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -104,33 +106,35 @@ router.post("/", async (req: Request, res: Response, next: NextFunction) => {
 /**
  * GET /api/rsvp
  * Admin-only: list all RSVPs with summary stats.
- * TODO: Add authentication middleware before deploying to production.
  */
-router.get("/", async (_req: Request, res: Response, next: NextFunction) => {
-  try {
-    const rsvps = await Rsvp.find().sort({ submittedAt: -1 }).lean();
+router.get(
+  "/",
+  requireAdminAuth,
+  async (_req: Request, res: Response, next: NextFunction) => {
+    try {
+      const rsvps = await Rsvp.find().sort({ submittedAt: -1 }).lean();
 
-    let attending = 0;
-    let notAttending = 0;
-    for (const r of rsvps) {
-      if (r.attending === "yes") attending++;
-      else if (r.attending === "no") notAttending++;
+      let attending = 0;
+      let notAttending = 0;
+      for (const r of rsvps) {
+        if (r.attending === "yes") attending++;
+        else if (r.attending === "no") notAttending++;
+      }
+
+      res.json({
+        success: true,
+        summary: {
+          total: rsvps.length,
+          attending,
+          notAttending,
+        },
+        data: rsvps,
+      });
+    } catch (err) {
+      next(err);
     }
-
-    res.json({
-      success: true,
-      summary: {
-        total: rsvps.length,
-        attending,
-        notAttending,
-        maybe: rsvps.length - attending - notAttending,
-      },
-      data: rsvps,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+  },
+);
 
 /**
  * GET /api/rsvp/search?firstname=...&lastname=...
@@ -167,74 +171,126 @@ router.get(
 
 /**
  * GET /api/rsvp/:id
- * Find an RSVP by ID
+ * Admin-only: find an RSVP by ID.
  */
-router.get("/:id", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { id } = req.params;
-
-    const rsvp = await Rsvp.findById(id).lean();
-
-    if (!rsvp) {
-      return res.status(404).json({
-        success: false,
-        message: "RSVP not found.",
-      });
-    }
-
-    res.json({
-      success: true,
-      data: rsvp,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * PUT /api/rsvp/:id
- * Updates an RSVP by ID
- */
-router.put("/:id", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { id } = req.params;
-    const { attending, dietaryRestrictions, songRequest, message } = req.body;
-
-    const rsvp = await Rsvp.findByIdAndUpdate(
-      id,
-      { attending, dietaryRestrictions, songRequest, message },
-      { new: true },
-    );
-    if (!rsvp) {
-      return res.status(404).json({
-        success: false,
-        message: "RSVP not found.",
-      });
-    }
-    res.json({
-      success: true,
-      message: "RSVP updated successfully",
-      data: rsvp,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
-
-/**
- * DELETE /api/rsvp/:id
- * Delete an RSVP
- */
-router.delete(
+router.get(
   "/:id",
+  requireAdminAuth,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
 
-      if (!id) {
+      if (!mongoose.isValidObjectId(id)) {
         return res.status(400).json({
           success: false,
-          message: "RSVP ID is required.",
+          message: "A valid RSVP ID is required.",
+        });
+      }
+
+      const rsvp = await Rsvp.findById(id).lean();
+
+      if (!rsvp) {
+        return res.status(404).json({
+          success: false,
+          message: "RSVP not found.",
+        });
+      }
+
+      res.json({
+        success: true,
+        data: rsvp,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/**
+ * PUT /api/rsvp/:id
+ * Admin-only: update an RSVP by ID.
+ */
+router.put(
+  "/:id",
+  requireAdminAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const {
+        firstname,
+        lastname,
+        email,
+        attending,
+        dietaryRestrictions,
+        songRequest,
+        message,
+      } = req.body;
+      const fn = typeof firstname === "string" ? firstname.trim() : "";
+      const ln = typeof lastname === "string" ? lastname.trim() : "";
+      const cleanEmail = typeof email === "string" ? email.trim() : "";
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "A valid RSVP ID is required.",
+        });
+      }
+
+      if (!fn || !cleanEmail || !["yes", "no"].includes(attending)) {
+        return res.status(400).json({
+          success: false,
+          message:
+            "First name, email, and a valid attendance status are required.",
+        });
+      }
+
+      const rsvp = await Rsvp.findById(id);
+      if (!rsvp) {
+        return res.status(404).json({
+          success: false,
+          message: "RSVP not found.",
+        });
+      }
+
+      rsvp.firstname = fn;
+      rsvp.lastname = ln;
+      rsvp.email = cleanEmail.toLowerCase();
+      rsvp.attending = attending;
+      rsvp.dietaryRestrictions =
+        typeof dietaryRestrictions === "string"
+          ? dietaryRestrictions.trim()
+          : "";
+      rsvp.songRequest =
+        typeof songRequest === "string" ? songRequest.trim() : "";
+      rsvp.message = typeof message === "string" ? message.trim() : "";
+      await rsvp.save();
+
+      res.json({
+        success: true,
+        message: "RSVP updated successfully",
+        data: rsvp.toObject(),
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/**
+ * DELETE /api/rsvp/:id
+ * Admin-only: delete an RSVP.
+ */
+router.delete(
+  "/:id",
+  requireAdminAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+
+      if (!mongoose.isValidObjectId(id)) {
+        return res.status(400).json({
+          success: false,
+          message: "A valid RSVP ID is required.",
         });
       }
 
