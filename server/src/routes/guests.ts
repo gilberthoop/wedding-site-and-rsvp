@@ -1,6 +1,7 @@
 import { Router, Request, Response, NextFunction } from "express";
 import { Guest } from "../models/Guest";
 import { findBestGuestMatch } from "../utils/fuzzyMatch";
+import { requireAdminAuth } from "../middleware/auth";
 
 const router = Router();
 
@@ -11,44 +12,48 @@ const escapeRegex = (s: string) =>
  * POST /api/guests
  * Create a new guest
  */
-router.post("/", async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const { firstname, lastname } = req.body;
+router.post(
+  "/",
+  requireAdminAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { firstname, lastname } = req.body;
 
-    const fn = typeof firstname === "string" ? firstname.trim() : "";
-    const ln = typeof lastname === "string" ? lastname.trim() : "";
+      const fn = typeof firstname === "string" ? firstname.trim() : "";
+      const ln = typeof lastname === "string" ? lastname.trim() : "";
 
-    if (!fn || !ln) {
-      return res.status(400).json({
-        success: false,
-        message: "First name and last name are required.",
+      if (!fn || !ln) {
+        return res.status(400).json({
+          success: false,
+          message: "First name and last name are required.",
+        });
+      }
+
+      // Case-insensitive duplicate check
+      const existingGuest = await Guest.findOne({
+        firstname: { $regex: new RegExp(`^${escapeRegex(fn)}$`, "i") },
+        lastname: { $regex: new RegExp(`^${escapeRegex(ln)}$`, "i") },
+      }).lean();
+
+      if (existingGuest) {
+        return res.status(409).json({
+          success: false,
+          message: "Guest already exists.",
+        });
+      }
+
+      const guest = await Guest.create({ firstname: fn, lastname: ln });
+
+      res.status(201).json({
+        success: true,
+        message: "Guest added successfully",
+        data: guest,
       });
+    } catch (err) {
+      next(err);
     }
-
-    // Case-insensitive duplicate check
-    const existingGuest = await Guest.findOne({
-      firstname: { $regex: new RegExp(`^${escapeRegex(fn)}$`, "i") },
-      lastname: { $regex: new RegExp(`^${escapeRegex(ln)}$`, "i") },
-    }).lean();
-
-    if (existingGuest) {
-      return res.status(409).json({
-        success: false,
-        message: "Guest already exists.",
-      });
-    }
-
-    const guest = await Guest.create({ firstname: fn, lastname: ln });
-
-    res.status(201).json({
-      success: true,
-      message: "Guest added successfully",
-      data: guest,
-    });
-  } catch (err) {
-    next(err);
-  }
-});
+  },
+);
 
 /**
  * GET /api/guests
@@ -122,11 +127,81 @@ router.get(
 );
 
 /**
+ * PUT /api/guests/:id
+ * Edit guest information
+ */
+router.put(
+  "/:id",
+  requireAdminAuth,
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { id } = req.params;
+      const { firstname, lastname } = req.body;
+
+      if (!id) {
+        return res.status(400).json({
+          success: false,
+          message: "Guest ID is required.",
+        });
+      }
+
+      const fn = typeof firstname === "string" ? firstname.trim() : "";
+      const ln = typeof lastname === "string" ? lastname.trim() : "";
+
+      if (!fn || !ln) {
+        return res.status(400).json({
+          success: false,
+          message: "First name and last name are required.",
+        });
+      }
+
+      // Check if guest exists
+      const guest = await Guest.findById(id);
+
+      if (!guest) {
+        return res.status(404).json({
+          success: false,
+          message: "Guest not found.",
+        });
+      }
+
+      // Check for duplicate (case-insensitive, excluding current guest)
+      const existingGuest = await Guest.findOne({
+        _id: { $ne: id },
+        firstname: { $regex: new RegExp(`^${escapeRegex(fn)}$`, "i") },
+        lastname: { $regex: new RegExp(`^${escapeRegex(ln)}$`, "i") },
+      }).lean();
+
+      if (existingGuest) {
+        return res.status(409).json({
+          success: false,
+          message: "Another guest with this name already exists.",
+        });
+      }
+
+      // Update guest
+      guest.firstname = fn;
+      guest.lastname = ln;
+      await guest.save();
+
+      res.json({
+        success: true,
+        message: "Guest updated successfully",
+        data: guest,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+);
+
+/**
  * DELETE /api/guests/:id
  * Delete a guest
  */
 router.delete(
   "/:id",
+  requireAdminAuth,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { id } = req.params;
