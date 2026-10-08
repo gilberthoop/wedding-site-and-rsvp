@@ -17,6 +17,17 @@ export interface RSVPDetails {
   message?: string;
 }
 
+export interface RsvpData extends RSVPDetails {
+  _id: string;
+  submittedAt: string;
+}
+
+export interface RsvpSummary {
+  total: number;
+  attending: number;
+  notAttending: number;
+}
+
 export interface DietaryOption {
   id: string;
   label: string;

@@ -10,11 +10,11 @@ import KeyIcon from "@mui/icons-material/Key";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import CodeIcon from "@mui/icons-material/Code";
-import EventAvailableOutlinedIcon from "@mui/icons-material/EventAvailableOutlined";
 import { palette } from "../../../theme/weddingTheme";
 import { alpha } from "@mui/material/styles";
 import { AdminUser, getAdminToken } from "../../../utils/helpers/admin";
 import GuestManager from "./GuestManager";
+import RsvpManager from "./RsvpManager";
 
 interface DashboardProps {
   admin: AdminUser;
@@ -209,46 +209,8 @@ const Dashboard = ({ admin }: DashboardProps) => {
       {/* Guest Manager */}
       <GuestManager />
 
-      {/* Capability Cards */}
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-          gap: 2.5,
-        }}
-      >
-        <Card
-          sx={{
-            bgcolor: palette.ivory,
-            borderRadius: 3,
-            p: 3,
-            border: `1px solid ${alpha(palette.beige, 0.35)}`,
-          }}
-        >
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
-            <EventAvailableOutlinedIcon sx={{ color: palette.hazelnut }} />
-            <Typography
-              variant="h6"
-              sx={{ fontSize: "1.1rem", color: palette.chocolate }}
-            >
-              RSVP Management
-            </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ color: palette.mocha, mb: 2 }}>
-            Your token will allow you to modify and delete RSVPs submitted by
-            guests.
-          </Typography>
-          <Chip
-            label="Ready for upcoming UI"
-            size="small"
-            sx={{
-              bgcolor: palette.cream,
-              color: palette.tan,
-              fontWeight: 500,
-            }}
-          />
-        </Card>
-      </Box>
+      {/* RSVP Manager */}
+      <RsvpManager />
     </Box>
   );
 };
