@@ -1,6 +1,7 @@
 import Stack from "@mui/material/Stack";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import Paper from "@mui/material/Paper";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import TextField from "@mui/material/TextField";
@@ -614,6 +615,44 @@ export const RSVPCard = () => {
                 disabled={loading}
                 sx={fieldSx}
               />
+
+              <Paper sx={{ padding: 2 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 1, color: palette.mocha, fontWeight: 600 }}
+                >
+                  Your Presence Is Our Greatest Gift
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 1, color: palette.mocha }}
+                >
+                  Your presence at our wedding is truly the greatest gift we
+                  could ask for. ❤️
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 1, color: palette.mocha }}
+                >
+                  If you would like to bless us with a gift as we begin this new
+                  chapter together, we would be grateful for a contribution
+                  toward our future together.
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 1, color: palette.mocha }}
+                >
+                  For those who prefer the convenience of e-Transfer, you may
+                  send your gift to <strong>williamgilbertgo@gmail.com</strong>
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ mb: 1, color: palette.mocha }}
+                >
+                  Thank you for celebrating this special moment with us. Your
+                  love, support, and presence mean so much to us!
+                </Typography>
+              </Paper>
             </Box>
 
             {formResponse?.status === "error" && (
